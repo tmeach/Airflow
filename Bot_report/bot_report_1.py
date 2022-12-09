@@ -17,7 +17,7 @@ from airflow.operators.python import get_current_context
 
 # функция для подключения к CH
 
-def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='student', password='dpo_python_2020'):
+def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
@@ -39,9 +39,9 @@ schedule_interval = '0 11 * * *'
 
 # Задал настройки для бота
 
-my_token = '5642886625:AAHn-dqXSiuBZHvlQbRvXBbAITmQRJVqfgY' # тут нужно заменить на токен вашего бота
+my_token = '***' 
 bot = telegram.Bot(token=my_token)
-chat_id = 68229919
+chat_id = ***
 
 # DAG
 @dag(default_args=default_args, schedule_interval=schedule_interval, catchup=False)

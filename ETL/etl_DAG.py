@@ -9,16 +9,16 @@ from airflow.operators.python import get_current_context
 
 
 # функция для подключения к CH
-def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='student', password='dpo_python_2020'):
+def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
 
 # подключение к базе test в CH
 connection_test = {'host':'https://clickhouse.lab.karpov.courses', 
-              'user':'student-rw', 
-              'password':'656e2b0c9c',
-              'database': 'test'}
+              'user':'***', 
+              'password':'***',
+              'database': '***'}
 
 # Дефолтные параметры
 default_args = {

@@ -24,7 +24,7 @@ default_args = {
 schedule_interval = '0 11 * * *'
 
 # Параметры Бота
-my_token = '5642886625:AAHn-dqXSiuBZHvlQbRvXBbAITmQRJVqfgY'
+my_token = '***'
 bot = telegram.Bot(token=my_token)
 
 
@@ -54,7 +54,7 @@ def alert_system():
     def run_alerts_feed(chat=None):
         # непосредственно сама система алертов
         chat_id = chat or -715927362
-        bot = telegram.Bot(token = '5642886625:AAHn-dqXSiuBZHvlQbRvXBbAITmQRJVqfgY')
+        bot = telegram.Bot(token = '***')
 
         data = Getch('''SELECT
                             toStartOfFifteenMinutes(time) as ts,
@@ -132,7 +132,7 @@ def alert_system():
     @task
     def run_alerts_msg(chat=None):
         chat_id = chat or -715927362
-        bot = telegram.Bot(token = '5642886625:AAHn-dqXSiuBZHvlQbRvXBbAITmQRJVqfgY')
+        bot = telegram.Bot(token = '***')
 
         data_msg = Getch('''SELECT
                             toStartOfFifteenMinutes(time) as ts,
