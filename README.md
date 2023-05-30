@@ -1,1 +1,3 @@
-В репозитории собраны проекты в рамках стажировки от Karpov.Courses
+В репозитории собраны проекты, выполненные в рамках стажировки: ETL pipeline / Telegram bot / Alert system
+
+The repository contains projects completed during the internship: ETL pipeline / Telegram bot / Alert system
