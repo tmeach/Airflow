@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
@@ -15,16 +14,19 @@ from airflow.decorators import dag, task
 from airflow.operators.python import get_current_context
 
 
-# функция для подключения к CH
+# Настройки для Telegram бота
+my_token = '***' 
+bot = telegram.Bot(token=my_token)
+chat_id = ***
 
+# Функция подключения к ClickHouse
 def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
 
 
-# Дефолтные параметры для DAG
-
+# Параметры для DAG
 default_args = {
     'owner': 't-pitsuev',
     'depends_on_past': False,
@@ -33,15 +35,8 @@ default_args = {
     'start_date': datetime(2022, 11, 15),
 }
 
-# Интервал запуска DAG
-
+# Расписание DAGa
 schedule_interval = '0 11 * * *'
-
-# Задал настройки для бота
-
-my_token = '***' 
-bot = telegram.Bot(token=my_token)
-chat_id = ***
 
 # DAG
 @dag(default_args=default_args, schedule_interval=schedule_interval, catchup=False)
@@ -60,10 +55,15 @@ def feed_report():
                     GROUP BY date
                     LIMIT 10
                     format TSVWithNames'''
-        df= ch_get_df (query = query)
-        return df
+        try:
+            df = ch_get_df(query)
+            return df
+        except RequestException as e:
+            error_msg = f"An error occurred while extracting data from ClickHouse: {str(e)}"
+            send_telegram_message(error_msg)
+            return None
     @task
-    def text_report(df):
+    def create_text_report(df):
         DAU = df['DAU'].iloc[0]
         views = df['views'].iloc[0]
         likes = df['likes'].iloc[0]
@@ -78,7 +78,7 @@ def feed_report():
         return
     
     @task
-    def visual_report(df):
+    def create_visual_report(df):
         fig, axes = plt.subplots(4, 1, figsize=(10, 20))
         fig.suptitle("Значение метрик за предыдущие 7 дней")   
 
