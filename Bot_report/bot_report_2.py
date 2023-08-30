@@ -1,5 +1,4 @@
 import telegram
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
@@ -12,17 +11,18 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task 
 from airflow.operators.python import get_current_context
 
+# Настройки для Telegram бота
+my_token = '***'
+bot = telegram.Bot(token=my_token)
+chat_id = ***
 
-# функция для подключения к CH
-
+# Функция подключения к ClickHouse
 def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
 
-
-# Дефолтные параметры для DAG
-
+# Параметры для DAG
 default_args = {
     'owner': 't-pitsuev',
     'depends_on_past': False,
@@ -31,18 +31,10 @@ default_args = {
     'start_date': datetime(2022, 11, 15),
 }
 
-# Интервал запуска DAG
-
+# Расписание DAGa
 schedule_interval = '0 11 * * *'
 
-# Задал настройки для бота
-
-my_token = '***'
-bot = telegram.Bot(token=my_token)
-chat_id = ***
-
 # DAG
-
 @dag(default_args=default_args, schedule_interval=schedule_interval, catchup=False)
 def dag_feed_msg():
     @task
@@ -85,7 +77,6 @@ def dag_feed_msg():
 
         report_date = datetime.now().date() - timedelta(days=1)
         
-
         msg = f'Ключевые метрики за {report_date}:\n \n - Аудитория ленты новостей: {DAU_feed}\n - Уникальные посты: {Uniq_post}\n - Просмотры: {Views}\n - Лайки: {Likes}\n - CTR: {CTR}\n - Аудитория сервиса сообщений: {DAU_message}\n - Количество отправленных сообщений: {Messages_amount}'
         bot.sendMessage(chat_id = chat_id, text = msg) 
         
