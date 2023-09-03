@@ -3,8 +3,8 @@
 
 **Список проектов:** 
 -  [Система выявления отклонений в ключевых метриках продукта](https://github.com/tmeach/Internship/tree/main/Alert_system).
--  [Автоматизация отчетности по продуктовым метриков, реализованная с помощью Telegram Bot](https://github.com/tmeach/Internship/tree/main/Bot_report).
--  [Дашборды для анализа ключевых метриков продукта и их отклонений](https://github.com/tmeach/Internship/tree/main/Alert_system).
+-  [Автоматизация отчетности по продуктовым метрикам, реализованная с помощью Telegram Bot](https://github.com/tmeach/Internship/tree/main/Bot_report).
+-  [Дашборды для анализа ключевых метрик продукта и их отклонений](https://github.com/tmeach/Internship/tree/main/Alert_system).
 -  [ETL Pipeline для построения отчетности из БД ClickHouse](https://github.com/tmeach/Internship/tree/main/ETL).
 
 ---
