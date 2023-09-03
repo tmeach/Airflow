@@ -8,8 +8,6 @@
 -  [ETL Pipeline для построения отчетности из БД ClickHouse](https://github.com/tmeach/Internship/tree/main/ETL).
 
 ---
-
-## Overview
 The repository contains projects completed as part of an internship from KarpovCourses.
 
 **List of projects:**
