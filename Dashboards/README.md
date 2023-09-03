@@ -1,7 +1,10 @@
-В этом проекте представлены дашборды, которые были сделаны в BI инструменте Apache Superset. Дашборды были разработаны с целью анализа ключевых метрик продукта, выявления отклонений и их причин, анализа влияния рекламной компании на метрики продукта.
-Продукт - приложение, объединяющее ленту новостей и сервис отправки сообщений. 
+Здесь представлены дашборды, которые я построил в рамках своей работы для анализа ключевых метрик продукта, выявления отклонений и их причин, анализа влияния рекламной компании на метрики продукта. Продукт - приложение, объединяющее ленту новостей и сервис отправки сообщений. 
 
----
+BI инструмент -  Apache Superset. Дашборды были разработаны с целью анализа ключевых метрик продукта, выявления отклонений и их причин, анализа влияния рекламной компании на метрики продукта.
 
-This project showcases dashboards created using the Apache Superset BI tool. The dashboards were developed for the purpose of analyzing key product metrics, identifying deviations and their causes, and analyzing the impact of advertising campaigns on product metrics.
-The product is an application that combines a news feed and a messaging service.
+**Список дашбордов**:
+- [Дашборд для описания ключевых аудиторных метрик в продукте](https://github.com/tmeach/Internship/tree/main/Dashboards/Main_product_metrics)
+- [Дашборд для анализа качества компании по привлечению аудитории отделом маркетинга + Дашборд для анализа причин падания аудитории](https://github.com/tmeach/Internship/tree/main/Dashboards/Producs_metric_analysis)
+- [Дашборд для анализа оперативных данных по основным метрикам продукта (уникальные посты, уникальные пользователи, трафик, топ постов и пользователей)](https://github.com/tmeach/Internship/tree/main/Dashboards/Real_time_metrics_data)
+
+**Все дашборды можно посмотреть подробнее на [Tableau](https://public.tableau.com/app/profile/tim12564517)**.
