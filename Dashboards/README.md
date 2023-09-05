@@ -8,4 +8,4 @@ BI инструмент -  Apache Superset.
 - [Дашборд для анализа качества компании по привлечению аудитории отделом маркетинга + Дашборд для анализа причин падания аудитории](https://github.com/tmeach/Internship/tree/main/Dashboards/Producs_metric_analysis).
 - [Дашборд для анализа оперативных данных по основным метрикам продукта (уникальные посты, уникальные пользователи, трафик, топ постов и пользователей)](https://github.com/tmeach/Internship/tree/main/Dashboards/Real_time_metrics_data).
 
-**Все дашборды можно посмотреть подробнее на [Tableau](https://public.tableau.com/app/profile/tim12564517)**.
+**Другие мои дашборды можно посмотреть на [Tableau](https://public.tableau.com/app/profile/tim12564517)**.
