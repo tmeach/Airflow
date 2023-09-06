@@ -30,8 +30,24 @@ bot = telegram.Bot(token=my_token)
 
 @dag(default_args=default_args, schedule_interval=schedule_interval, catchup=False)
 def alert_system():
+    '''
+    Этот DAG выполняет систему мониторинга и алертов на основе данных метрик и сообщений
+    '''
     @task()
     def check_anomaly_feed(df, metric, a=4, n=5):
+        '''
+        Функция для поиска аномалий в метрике с использованием межквартильного размаха.
+        Args:
+            df (DataFrame): DataFrame с данными метрики.
+            metric (str): Название метрики.
+            a (int): Параметр для расчета верхней и нижней границы аномалии.
+            n (int): Размер окна для вычисления метрики.
+
+        Returns:
+            int: Флаг аномалии (1 - есть аномалия, 0 - нет аномалии).
+            DataFrame: Обновленный DataFrame с рассчитанными данными.
+        '''
+        
         # функция предлагает алгоритм поиска аномалий в данных (межквартильный размах)
         df['q25'] = df[metric].shift(1).rolling(n).quantile(0.25)
         df['q75'] = df[metric].shift(1).rolling(n).quantile(0.75)
@@ -42,7 +58,6 @@ def alert_system():
         df['up'] = df['up'].rolling(n, center=True, min_periods=1).mean()
         df['low'] = df['low'].rolling(n, center=True, min_periods=1).mean()
 
-    
         if df[metric].iloc[-1] < df['low'].iloc[-1] or df[metric].iloc[-1] > df['up'].iloc[-1]:
             is_alert = 1
         else:
@@ -52,6 +67,15 @@ def alert_system():
 
     @task
     def run_alerts_feed(chat=None):
+         """
+        Функция для выполнения алертов на основе данных метрик.
+
+        Args:
+            chat (int): Идентификатор чата для отправки алертов.
+
+        Returns:
+            None
+        """
         # непосредственно сама система алертов
         chat_id = chat or -715927362
         bot = telegram.Bot(token = '***')
@@ -111,6 +135,19 @@ def alert_system():
 
     @task
     def check_anomaly_msg(dff, metric, a=4, n=5):
+        """
+        Функция для поиска аномалий в метрике сообщений с использованием межквартильного размаха.
+
+        Args:
+            dff (DataFrame): DataFrame с данными метрики сообщений.
+            metric (str): Название метрики.
+            a (int): Параметр для расчета верхней и нижней границы аномалии.
+            n (int): Размер окна для вычисления метрики.
+
+        Returns:
+            int: Флаг аномалии (1 - есть аномалия, 0 - нет аномалии).
+            DataFrame: Обновленный DataFrame с рассчитанными данными.
+        """
         # функция предлагает алгоритм поиска аномалий в данных (межквартильный размах)
         dff['q25'] = dff[metric].shift(1).rolling(n).quantile(0.25)
         dff['q75'] = dff[metric].shift(1).rolling(n).quantile(0.75)
@@ -131,6 +168,15 @@ def alert_system():
     
     @task
     def run_alerts_msg(chat=None):
+        """
+        Функция для выполнения алертов на основе данных метрик сообщений.
+
+        Args:
+            chat (int): Идентификатор чата для отправки алертов.
+
+        Returns:
+            None
+        """
         chat_id = chat or -715927362
         bot = telegram.Bot(token = '***')
 

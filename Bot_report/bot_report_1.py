@@ -21,6 +21,18 @@ chat_id = ***
 
 # Функция подключения к ClickHouse
 def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
+    """
+    Подключение к ClickHouse и выполнение SQL-запроса.
+
+    Args:
+        query (str): SQL-запрос.
+        host (str): URL ClickHouse-сервера.
+        user (str): Имя пользователя.
+        password (str): Пароль.
+
+    Returns:
+        pandas.DataFrame: Результат выполнения запроса в виде DataFrame.
+    """
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
@@ -43,6 +55,12 @@ schedule_interval = '0 11 * * *'
 def feed_report():
     @task
     def extract_data():
+        """
+        Извлечение данных из ClickHouse.
+
+        Returns:
+            pandas.DataFrame: DataFrame с данными.
+        """
         query= '''SELECT
                         toFloat64(toDate(time)) as date,
                         COUNT(DISTINCT user_id) as DAU,
@@ -62,23 +80,42 @@ def feed_report():
             error_msg = f"An error occurred while extracting data from ClickHouse: {str(e)}"
             send_telegram_message(error_msg)
             return None
+    
     @task
     def create_text_report(df):
+        """
+        Создание текстового отчета и отправка в Telegram.
+
+        Args:
+            df (pandas.DataFrame): DataFrame с данными.
+
+        Returns:
+            None
+        """
         DAU = df['DAU'].iloc[0]
         views = df['views'].iloc[0]
         likes = df['likes'].iloc[0]
-        CTR = round(df['CTR'].iloc[0],2)
-        LPU = round(df['LPU'].iloc[0],2)
+        CTR = round(df['CTR'].iloc[0], 2)
+        LPU = round(df['LPU'].iloc[0], 2)
         report_date = datetime.now().date() - timedelta(days=1)
 
         # Текстовый отчет
         msg = f'💼 Лента новостей. Отчет за {report_date}:\n \n 🚶 DAU: {DAU}\n 👀 Просмотры: {views}\n 💔 Лайки: {likes}\n 🎯 CTR: {CTR}\n 🥰 LPU: {LPU}'
-        bot.sendMessage(chat_id = chat_id, text = msg)
+        bot.sendMessage(chat_id=chat_id, text=msg)
         
         return
     
     @task
     def create_visual_report(df):
+        """
+        Создание визуального отчета и отправка в Telegram.
+
+        Args:
+            df (pandas.DataFrame): DataFrame с данными.
+
+        Returns:
+            None
+        """
         fig, axes = plt.subplots(4, 1, figsize=(10, 20))
         fig.suptitle("Значение метрик за предыдущие 7 дней")   
 
@@ -107,16 +144,9 @@ def feed_report():
         bot.sendPhoto(chat_id=chat_id, photo=plot_object)
         
         return
-
-    
     
     df = extract_data()
-    text_report = text_report(df)
-    visual_report = visual_report(df)
+    text_report(df)
+    visual_report(df)
     
-feed_report = feed_report()  
-    
-    
-
-
-
+feed_report = feed_report()
