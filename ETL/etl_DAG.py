@@ -7,9 +7,20 @@ import pandahouse as ph
 from airflow.decorators import dag, task 
 from airflow.operators.python import get_current_context
 
-
 # функция для подключения к CH
 def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
+    """
+    Подключение к ClickHouse и выполнение SQL-запроса.
+
+    Args:
+        query (str): SQL-запрос.
+        host (str): URL ClickHouse-сервера.
+        user (str): Имя пользователя.
+        password (str): Пароль.
+
+    Returns:
+        pandas.DataFrame: Результат выполнения запроса в виде DataFrame.
+    """
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
@@ -36,6 +47,12 @@ schedule_interval = '0 07 * * *'
 def dag_tpitsuev():
     @task()
     def extract_feed():
+        """
+        Извлечение данных из ClickHouse для действий в ленте новостей.
+
+        Returns:
+            pandas.DataFrame: DataFrame с данными.
+        """
         query = """SELECT 
                         user_id,
                         toDate(time) as event_date,
@@ -52,6 +69,12 @@ def dag_tpitsuev():
         return df_feed
     @task()
     def extract_msg():
+        """
+        Извлечение данных из ClickHouse для сообщений.
+
+        Returns:
+            pandas.DataFrame: DataFrame с данными.
+        """
         query = """SELECT
                         user_id,
                         date as event_date,
@@ -96,84 +119,28 @@ def dag_tpitsuev():
     
     @task()
     def union_df(df_feed, df_msg):
+        """
+        Объединение двух DataFrame.
+
+        Args:
+            df_feed (pandas.DataFrame): DataFrame с данными о действиях в ленте новостей.
+            df_msg (pandas.DataFrame): DataFrame с данными о сообщениях.
+
+        Returns:
+            pandas.DataFrame: Объединенный DataFrame.
+        """
         df = df_feed.merge(df_msg, how = 'outer', on = ['user_id','event_date','gender','age','os']).dropna()
         return df
     
     @task()
     def transform_gender(df):
-        df_gender = df[['event_date','gender','likes', 'views', 'messages_sent', 'messages_received', 'users_received', 'users_sent']]\
-        .groupby(['gender','event_date'])\
-        .sum()\
-        .reset_index()
-        df_gender['dimension'] = 'gender'
-        df_gender.rename(columns = {'gender':'dimension_value'}, inplace = True)
-        return df_gender
-                        
-    @task()
-    def transform_age(df):
-        df_age = df[['event_date','age','likes', 'views', 'messages_sent', 'messages_received', 'users_received', 'users_sent']]\
-        .groupby(['age','event_date'])\
-        .sum()\
-        .reset_index()
-        df_age['dimension'] = 'age'
-        df_age.rename(columns = {'age':'dimension_value'}, inplace = True)
-        return df_age
+        """
+        Преобразование данных по полу пользователей.
 
-    @task()
-    def transform_os(df):
-        df_os = df[['event_date','os','likes', 'views', 'messages_sent', 'messages_received', 'users_received', 'users_sent']]\
-        .groupby(['os','event_date'])\
-        .sum()\
-        .reset_index()
-        df_os['dimension'] = 'os'
-        df_os.rename(columns = {'os':'dimension_value'}, inplace = True)
-        return df_os
+        Args:
+            df (pandas.DataFrame): Объединенный DataFrame.
 
-    @task
-    def union_all(df_gender, df_age, df_os):
-        concat_df = pd.concat([df_gender, df_age, df_os]).reset_index(drop=True)
-        concat_df = concat_df.astype({'event_date' : 'datetime64',
-                                        'dimension' : 'str',
-                                        'dimension_value' : 'str',
-                                        'views' : 'int64',
-                                        'likes' : 'int64',
-                                        'messages_sent' : 'int64',
-                                        'users_received' : 'int64',
-                                        'messages_received' : 'int64',
-                                        'users_sent' : 'int64'})
-        
-        return concat_df
-    
-    @task
-    def load (concat_df):
-        q = '''
-        CREATE TABLE IF NOT EXISTS test.tpitsuev_etl_lesson
-        (event_date Date,
-        dimension String,
-        dimension_value String,
-        views Int64,
-        likes Int64,
-        messages_sent Int64,
-        users_received Int64,
-        messages_received Int64,
-        users_sent Int64
-        ) 
-        ENGINE = MergeTree
-        order by event_date
-        partition by toYYYYMMDD(event_date)
-        '''
-        ph.execute(query=q, connection=connection_test)
-        ph.to_clickhouse(df=concat_df, table = 'tpitsuev_etl_lesson', connection = connection_test, index = False)
-    
-    df_feed = extract_feed()
-    df_msg = extract_msg()
-    df = union_df(df_feed, df_msg)
-    
-    df_gender = transform_gender(df)
-    df_age = transform_age(df)
-    df_os = transform_os(df)
-    
-    concat_df = union_all(df_gender, df_age, df_os)
-    load(concat_df)
-
-dag_tpitsuev = dag_tpitsuev()
+        Returns:
+            pandas.DataFrame: Преобразованный DataFrame.
+        """
+        df_gender = df[['event_date','gender','likes', 'views', 'messages_sent', 'messages_received

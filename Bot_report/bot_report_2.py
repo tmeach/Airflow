@@ -6,7 +6,6 @@ import pandas as pd
 import requests 
 import pandahouse as ph
 
-
 from datetime import datetime, timedelta
 from airflow.decorators import dag, task 
 from airflow.operators.python import get_current_context
@@ -18,6 +17,18 @@ chat_id = ***
 
 # Функция подключения к ClickHouse
 def ch_get_df(query='Select 1', host='https://clickhouse.lab.karpov.courses', user='***', password='***'):
+    """
+    Подключение к ClickHouse и выполнение SQL-запроса.
+
+    Args:
+        query (str): SQL-запрос.
+        host (str): URL ClickHouse-сервера.
+        user (str): Имя пользователя.
+        password (str): Пароль.
+
+    Returns:
+        pandas.DataFrame: Результат выполнения запроса в виде DataFrame.
+    """
     r = requests.post(host, data=query.encode("utf-8"), auth=(user, password), verify=False)
     result = pd.read_csv(StringIO(r.text), sep='\t')
     return result
@@ -39,6 +50,12 @@ schedule_interval = '0 11 * * *'
 def dag_feed_msg():
     @task
     def extract():
+        """
+        Извлечение данных из ClickHouse.
+
+        Returns:
+            pandas.DataFrame: DataFrame с данными.
+        """
         query= '''SELECT *
                     FROM(SELECT
                             toDate(time) as date,
@@ -62,27 +79,38 @@ def dag_feed_msg():
                     ORDER BY date
                     format TSVWithNames'''
 
-        df = ch_get_df (query = query)
+        df = ch_get_df(query=query)
         return df
     
     @task
     def send_text_report():
+        """
+        Создание и отправка текстового отчета в Telegram.
+
+        Returns:
+            None
+        """
         DAU_feed = df['DAU_feed'].values[0]
         Uniq_post = df['uniq_post'].values[0]
         Views = df['views'].values[0]
         Likes = df['likes'].values[0]
-        CTR = round(df['CTR'].values[0],2)
+        CTR = round(df['CTR'].values[0], 2)
         DAU_message = df['DAU_message'].values[0]
         Messages_amount = df['messages_amount'].values[0]
 
         report_date = datetime.now().date() - timedelta(days=1)
         
         msg = f'Ключевые метрики за {report_date}:\n \n - Аудитория ленты новостей: {DAU_feed}\n - Уникальные посты: {Uniq_post}\n - Просмотры: {Views}\n - Лайки: {Likes}\n - CTR: {CTR}\n - Аудитория сервиса сообщений: {DAU_message}\n - Количество отправленных сообщений: {Messages_amount}'
-        bot.sendMessage(chat_id = chat_id, text = msg) 
+        bot.sendMessage(chat_id=chat_id, text=msg) 
         
     @task
     def send_visual_report(): 
-        
+        """
+        Создание и отправка визуального отчета в Telegram.
+
+        Returns:
+            None
+        """
         # Задаю параметры графиков
         fig, axes = plt.subplots(5, 1, figsize=(10, 20))   
         fig.suptitle("Значение метрик за предыдущие 7 дней")   
@@ -103,7 +131,6 @@ def dag_feed_msg():
         axes[3].set(xlabel=' ', ylabel=' ')
         sns.lineplot(data=df, ax=axes[3], x='date', y='CTR')
 
-
         axes[4].set(title='Количество сообщений')
         axes[4].set(xlabel=' ', ylabel=' ')
         sns.lineplot(data=df, ax=axes[4], x='date', y='messages_amount')
@@ -117,11 +144,6 @@ def dag_feed_msg():
         # отправляем фото в бота
         bot.sendPhoto(chat_id=chat_id, photo=plot_object)
     
-    
     df = extract()
 
-
 dag_feed_msg = dag_feed_msg()
-
-
-
